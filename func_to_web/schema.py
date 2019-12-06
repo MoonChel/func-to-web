@@ -1,4 +1,6 @@
 from typing import Callable, Dict
+from dataclasses import asdict
+
 from .resolvers import build_argument_schema
 
 
@@ -7,7 +9,7 @@ def build_function_schema(function: Callable):
 
     for arg_name, arg_type in function.__annotations__.items():
         arg_schema = build_argument_schema(arg_name, arg_type)
-        annotations.append(arg_schema.as_dict())
+        annotations.append(asdict(arg_schema))
 
     fully_qualified_name = ".".join([function.__module__, function.__name__])
 

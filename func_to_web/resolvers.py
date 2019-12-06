@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import enum
-from typing import Type, Any, Dict, List
-from dataclasses import is_dataclass, dataclass, field
+from typing import Type, Any, Dict, List, get_type_hints
+from dataclasses import is_dataclass, dataclass, field, asdict
+
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 class PYTHON_TYPE(enum.Enum):
@@ -37,30 +41,25 @@ def resolve_type(t: Type) -> PYTHON_TYPE:
 @dataclass
 class ArgSchema:
     name: str
-    type: str
+    type: PYTHON_TYPE
     fields: List[ArgSchema] = field(default_factory=list)
-
-    def as_dict(self):
-        schema = {"name": self.name, "type": self.type}
-
-        if self.fields:
-            schema["fields"] = [arg_field.as_dict() for arg_field in self.fields]
-
-        return schema
 
 
 def build_argument_schema(arg_name: str, arg_type: Type) -> ArgSchema:
     python_type = resolve_type(arg_type)
-    schema = ArgSchema(name=arg_name, type=python_type.name)
+    schema = ArgSchema(name=arg_name, type=python_type)
 
     # recursivly resolve dataclass types
     if python_type == PYTHON_TYPE.dataclass:
-        for (
-            dataclass_field_name,
-            dataclass_field,
-        ) in arg_type.__dataclass_fields__.items():
+        try:
+            hints = get_type_hints(arg_type)
+        except NameError:
+            logger.warning("Please check if 'type' is available globally")
+            raise
+
+        for class_field_name, class_field_type in hints.items():
             schema.fields.append(
-                build_argument_schema(dataclass_field_name, dataclass_field.type)
+                build_argument_schema(class_field_name, class_field_type)
             )
 
     return schema
