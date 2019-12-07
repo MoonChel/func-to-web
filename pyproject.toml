@@ -2,7 +2,7 @@
 name = "func_to_web"
 version = "0.1.0"
 description = ""
-authors = ["vlado <vladimir.chernenko@kiwi.com>"]
+authors = ["vlado <vlado.chernenko@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^2.7"

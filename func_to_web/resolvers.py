@@ -44,6 +44,14 @@ class ArgSchema:
     type: PYTHON_TYPE
     fields: List[ArgSchema] = field(default_factory=list)
 
+    def as_dict(self):
+        d = {"name": self.name, "type": self.type.name}
+
+        if self.type == PYTHON_TYPE.dataclass:
+            d["fields"] = [field.as_dict() for field in self.fields]
+
+        return d
+
 
 def build_argument_schema(arg_name: str, arg_type: Type) -> ArgSchema:
     python_type = resolve_type(arg_type)
