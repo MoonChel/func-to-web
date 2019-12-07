@@ -30,3 +30,7 @@ will generate this json description:
 ```
 
 which can be easily dumped into json object
+
+## Supported types
+
+https://github.com/MoonChel/func-to-web/blob/aef19dd9952687f2f4a9f088ceea42c47a2ebe05/func_to_web/resolvers.py#L12

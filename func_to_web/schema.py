@@ -1,7 +1,29 @@
-from typing import Callable, Dict, List
-from dataclasses import dataclass
+from __future__ import annotations
 
-from .resolvers import build_argument_schema, ArgSchema
+from typing import Callable, List, Type
+from dataclasses import dataclass, field
+
+from logging import getLogger
+
+from .resolvers import PYTHON_TYPE, resolve_type
+
+
+logger = getLogger(__name__)
+
+
+@dataclass
+class ArgSchema:
+    name: str
+    type: PYTHON_TYPE
+    fields: List[ArgSchema] = field(default_factory=list)
+
+    def as_dict(self):
+        result = {"name": self.name, "type": self.type.name}
+
+        if self.type == PYTHON_TYPE.dataclass:
+            result["fields"] = [field.as_dict() for field in self.fields]
+
+        return result
 
 
 @dataclass
@@ -39,20 +61,21 @@ def build_function_schema(function: Callable):
     return schema
 
 
-class FunctionRegistry:
-    def __init__(self):
-        self.schema = {}
+def build_argument_schema(arg_name: str, arg_type: Type) -> ArgSchema:
+    python_type = resolve_type(arg_type)
+    schema = ArgSchema(name=arg_name, type=python_type)
 
-    def register(self, function: Callable):
-        self.schema[function] = build_function_schema(function)
+    # recursivly resolve dataclass types
+    if python_type == PYTHON_TYPE.dataclass:
+        try:
+            hints = get_type_hints(arg_type)
+        except NameError:
+            logger.warning("Please check if 'type' is available globally")
+            raise
 
-    def get_function(self, fully_qualified_name):
-        for function, schema in self.schema.items():
-            if schema["fully_qualified_name"] == fully_qualified_name:
-                return function
+        for class_field_name, class_field_type in hints.items():
+            schema.fields.append(
+                build_argument_schema(class_field_name, class_field_type)
+            )
 
-    def as_dict(self):
-        return {
-            schema.fully_qualified_name: schema.as_dict()
-            for schema in self.schema.values()
-        }
+    return schema

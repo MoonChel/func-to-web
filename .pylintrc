@@ -1,0 +1,43 @@
+[MASTER]
+# jobs=0 means 'use all CPUs'
+jobs=0
+ignore=node_modules
+
+[FORMAT]
+logging-modules=
+  logging,
+  structlog,
+
+# Maximum number of characters on a single line.
+max-line-length=120
+
+[MESSAGES CONTROL]
+disable =
+  invalid-name,
+  no-value-for-parameter,
+  no-member,
+  unused-argument,
+  broad-except,
+  relative-import,
+  wrong-import-position,
+  bare-except,
+  locally-disabled,
+  protected-access,
+  abstract-method,
+  no-self-use,
+  fixme,
+  ungrouped-imports,
+  bad-continuation,
+  too-many-instance-attributes,
+  arguments-differ,
+  too-many-arguments,
+  too-many-locals,
+  missing-docstring,
+  too-few-public-methods,
+  cell-var-from-loop,
+  invalid-sequence-index,
+  no-else-return,
+  too-many-function-args
+
+[REPORTS]
+output-format=colorized
